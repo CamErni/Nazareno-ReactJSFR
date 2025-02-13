@@ -7,11 +7,9 @@ import {
     addQuestionAsync,
     deleteQuestionAsync,
     updateQuestionAsync,
-  
 } from "../redux/questionsSlice";
 import { useNavigate } from "react-router-dom";
 import { login, logout } from "../redux/authSlice";
-
 
 const ExaminerPage = () => {
     const dispatch = useDispatch();
@@ -23,48 +21,38 @@ const ExaminerPage = () => {
     const [editIndex, setEditIndex] = useState(null);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
 
-
-   
     useEffect(() => {
         if (!isAuthenticated) {
             dispatch(logout());
             navigate("/");
         }
-        //} else {
-        //    handleRefresh();
-        //}
-        //dispatch(fetchQuestions())
-    });
-    
-    const onSubmit = (data) => {
+    }, [isAuthenticated, dispatch, navigate]);
+
+    useEffect(() => {
+        dispatch(fetchQuestions());
+    }, [dispatch]);
+
+    const onSubmit = async (data) => {
         if (editIndex !== null) {
-            const questionToUpdate = questions[0].find(q => q.id === editIndex);
-            console.log(editIndex)
-            //const questionToUpdate = questions[0][editIndex];
-            dispatch(
+            const questionToUpdate = questions.find(q => q.id === editIndex);
+            console.log(editIndex);
+            await dispatch(
                 updateQuestionAsync({
-                    id: questionToUpdate.id, // Assuming each question has a unique id
-                    updatedQuestion: { id:questionToUpdate.id, qst: data.question, ans: data.answer },
+                    id: questionToUpdate.id,
+                    updatedQuestion: { id: questionToUpdate.id, qst: data.question, ans: data.answer },
                 })
             );
             setEditIndex(null);
         } else {
-            dispatch(addQuestionAsync({ qst: data.question, ans: data.answer }));
+            await dispatch(addQuestionAsync({ qst: data.question, ans: data.answer }));
         }
         reset();
+        dispatch(fetchQuestions());
     };
-    //const handleButtonClick = () => {
-    //    if (dispatch(fetchQuestions())) // Dispatch the fetch action
-    //    { 
-    //        reset();
-    //    }
-    //};
-   
+
     const handleEdit = (index) => {
-        //index=index-1
-        const questionToEdit = questions[0].find(q => q.id === index);
-        //const questionToEdit = questions[0][index];
-        console.log(index)
+        const questionToEdit = questions.find(q => q.id === index);
+        console.log(index);
         setValue("question", questionToEdit.qst);
         setValue("answer", questionToEdit.ans);
         setEditIndex(index);
@@ -72,7 +60,6 @@ const ExaminerPage = () => {
 
     const handleDelete = (id) => {
         dispatch(deleteQuestionAsync(id));
-        reset();
     };
 
     const handleGoBack = () => {
@@ -83,15 +70,8 @@ const ExaminerPage = () => {
         dispatch(logout());
         navigate("/");
     };
-    console.log("Questions in ExaminerPage:", questions);
-    if (questions.length > 0 && Array.isArray(questions[0])) {
-        const ids = questions[0].map(q => q.id);
-        console.log(ids);
-    }
-    
 
     return (
-        
         <div className="flex flex-col items-center justify-center min-h-screen bg-theme-lightest p-8">
             {isAuthenticated && (
                 <div className="w-full flex justify-between items-center p-4 bg-theme-dark text-white fixed top-0 left-0">
@@ -126,14 +106,11 @@ const ExaminerPage = () => {
                 </button>
             </form>
             <div className="w-full max-w-md">
-               
                 {questions.length > 0 ? (
-                    questions[0].map((q, index) => (
+                    questions.map((q, index) => (
                         <div key={index} className="mb-2 flex text-theme-dark items-center">
                             <div className="flex-grow">
                                 <span>{q.qst}</span>
-                                
-
                             </div>
                             <div className="flex-grow">
                                 <span>{q.ans}</span>
@@ -155,7 +132,7 @@ const ExaminerPage = () => {
                         </div>
                     ))
                 ) : (
-                    <p>Loading questions...</p> // Shows loading text until questions are available
+                    <p>Loading questions...</p>
                 )}
             </div>
             <button

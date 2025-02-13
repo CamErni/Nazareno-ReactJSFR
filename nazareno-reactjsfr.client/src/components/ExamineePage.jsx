@@ -23,8 +23,8 @@ const ExamineePage = () => {
     });
     const onSubmit = (data) => {
         let newScore = 0;
-        const passingGrade = questions[0].length / 2;
-        questions[0].forEach((q, index) => {
+        const passingGrade = questions.length / 2;
+        questions.forEach((q, index) => {
             if (
                 data[`answer${index}`] &&
                 data[`answer${index}`].toLowerCase().trim() === q.ans.toLowerCase()
@@ -56,7 +56,7 @@ const ExamineePage = () => {
         setScore(null);
     };
 
-    console.log("Questions in ExamineePage:", questions[0]);
+    console.log("Questions in ExamineePage:", questions);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-theme-lightest p-8">
@@ -75,7 +75,7 @@ const ExamineePage = () => {
                 Examinee Page
             </h1>
             <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
-                {questions[0].map((q, index) => (
+                {questions.map((q, index) => (
                     <div key={index} className="mb-4 bg-white shadow-md rounded p-4">
                         <span className="text-theme-dark block mb-2">{q.qst}</span>
                         <input
