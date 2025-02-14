@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.SqlServer;
+using Microsoft.IdentityModel.Tokens;
 using Nazareno_ReactJSFR.Server;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +29,41 @@ builder.Services.AddCors(options =>
 });
 var app = builder.Build();
 
+//builder.Services.AddAuthentication(options =>
+//{
+//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//})
+//    .AddJwtBearer(options =>
+//    {
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidateLifetime = true,
+//            ValidateIssuerSigningKey = true,
+//            ValidIssuer = "YourIssuer",
+//            ValidAudience = "YourAudience",
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKey"))
+//        };
+//    });
+
+
+//builder.Services.AddControllers();
+//if (env.IsDevelopment())
+//{
+//    app.UseDeveloperExceptionPage();
+//}
+
+app.UseRouting();
+
+app.UseAuthentication(); // Add this line
+app.UseAuthorization();
+
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//});
 app.UseDefaultFiles();
 app.UseStaticFiles();
 

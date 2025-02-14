@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/authSlice";
-
+import {
+    fetchQuestions
+} from "../redux/questionsSlice";
 const ChoicePage = () => {
     const [disableButtn, setDisableButtn] = useState(true);
     const navigate = useNavigate();
@@ -23,7 +25,9 @@ const ChoicePage = () => {
         if (questions.length === 0) {
             setDisableButtn(true);
         } else setDisableButtn(false);
+        dispatch(fetchQuestions());
     });
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-theme-lightest">
             {isAuthenticated && (

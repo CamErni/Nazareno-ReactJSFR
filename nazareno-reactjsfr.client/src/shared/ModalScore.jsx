@@ -1,5 +1,8 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React from "react";
+import passImage from './pass.jpg';
+import failImage from './fail.jpg';
 
 const ModalScore = ({ score, closeModal, passed }) => {
     return (
@@ -20,7 +23,12 @@ const ModalScore = ({ score, closeModal, passed }) => {
                         <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div className="sm:flex sm:items-start">
                                 {passed ? (
+                                   
+                                    
                                     <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <div className="">
+                                            <img src={passImage} width={100} height={100} alt='P' />
+                                        </div>
                                         <svg
                                             className="h-6 w-6 text-green-600"
                                             fill="none"
@@ -37,8 +45,11 @@ const ModalScore = ({ score, closeModal, passed }) => {
                                         </svg>
                                     </div>
                                 ) : (
+                                    
                                     <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <svg
+                                            <div className="">
+                                                <img src={failImage} width={100} height={100} alt='F' /></div>
+                                            <svg
                                             className="h-6 w-6 text-red-600"
                                             fill="none"
                                             viewBox="0 0 24 24"
