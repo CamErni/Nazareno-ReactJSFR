@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import ModalScore from "../shared/ModalScore";
 import { logout } from "../redux/authSlice";
@@ -12,15 +12,16 @@ const ExamineePage = () => {
     const questions = useSelector((state) => state.questions.questions);
     const { register, handleSubmit } = useForm();
     const [score, setScore] = useState(null);
-    const { isAuthenticated, user } = useSelector((state) => state.auth);
+    const { isAuthenticated, user, roles } = useSelector((state) => state.auth);
     const [pass, setPass] = useState(null);
 
     useEffect(() => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated || !roles.includes("examinee")) {
             dispatch(logout());
             navigate("/");
         }
-    });
+    }, [isAuthenticated, roles, dispatch, navigate]);
+
     const onSubmit = (data) => {
         let newScore = 0;
         const passingGrade = questions.length / 2;
@@ -55,8 +56,6 @@ const ExamineePage = () => {
     const closeModal = () => {
         setScore(null);
     };
-
-    console.log("Questions in ExamineePage:", questions);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-theme-lightest p-8">

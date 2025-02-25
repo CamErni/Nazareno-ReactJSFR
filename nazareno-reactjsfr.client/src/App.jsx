@@ -1,33 +1,30 @@
 /* eslint-disable no-unused-vars */
-// eslint-disable-next-line no-unused-vars
+// App.jsx - Restrict navigation based on user roles
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import ChoicePage from "./components/ChoicePage";
 import ExaminerPage from "./components/ExaminerPage";
 import ExamineePage from "./components/ExamineePage";
 import LoginPage from "./components/LoginPage";
-import { useDispatch } from "react-redux";
-//import { login } from "./redux/authSlice";
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from "react-redux";
 
 const App = () => {
-    const dispatch = useDispatch();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-   
+    const { isAuthenticated, role } = useSelector((state) => state.auth);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (token) {
-            // Dispatch an action to set the user as authenticated
-            setIsAuthenticated(true); // Adjust this based on your login action
-        }
+        setLoading(false);
     }, []);
+
+    if (loading) return <div>Loading...</div>;
+
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<LoginPage />} />
-                <Route path="/choices" element={<ChoicePage />} />
-                <Route path="/examiner" element={<ExaminerPage />} />
-                <Route path="/examinee" element={<ExamineePage />} />
+                <Route path="/" element={isAuthenticated ? <Navigate to="/choices" /> : <LoginPage />} />
+                <Route path="/choices" element={isAuthenticated ? <ChoicePage /> : <Navigate to="/" />} />
+                <Route path="/examiner" element={isAuthenticated && role === "examiner" ? <ExaminerPage /> : <Navigate to="/" />} />
+                <Route path="/examinee" element={isAuthenticated && role === "examinee" ? <ExamineePage /> : <Navigate to="/" />} />
             </Routes>
         </Router>
     );

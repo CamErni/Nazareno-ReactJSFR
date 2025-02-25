@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// QuestionController.cs - Enforcing RBAC policies
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Nazareno_ReactJSFR.Server.Models;
 
@@ -16,6 +18,7 @@ namespace Nazareno_ReactJSFR.Server.Controllers
         }
 
         [HttpGet]
+        [Authorize] // Both examiner and examinee can access
         public async Task<ActionResult<List<Question>>> GetAllQuestions()
         {
             var questions = await _context.Questions.ToListAsync();
@@ -23,7 +26,8 @@ namespace Nazareno_ReactJSFR.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<List<Question>>> GetQuestion(int id)
+        [Authorize] // Both roles can access
+        public async Task<ActionResult<Question>> GetQuestion(int id)
         {
             var question = await _context.Questions.FindAsync(id);
             if (question is null)
@@ -34,33 +38,39 @@ namespace Nazareno_ReactJSFR.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<Question>>> AddQuestion(Question question)
+        [Authorize(Policy = "examineeonly")] // Only examinee can submit
+        public async Task<ActionResult<Question>> AddQuestion(Question question)
         {
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
-            return Ok(await _context.Questions.ToListAsync());
+            return Ok(question);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<List<Question>>> UpdateQuestion(Question updatedQuestion)
+        [Authorize(Policy = "examineronly")] // Only examiner can update
+        public async Task<ActionResult> UpdateQuestion(int id, Question updatedQuestion)
         {
-            var dbQuestion = await _context.Questions.FindAsync(updatedQuestion.Id);
+            var dbQuestion = await _context.Questions.FindAsync(id);
             if (dbQuestion is null)
                 return NotFound();
-            dbQuestion.Ans = updatedQuestion.Ans;
-            dbQuestion.Qst = updatedQuestion.Qst;
-            await _context.SaveChangesAsync(); // Don't forget to save changes
 
-            return Ok(await _context.Questions.ToListAsync());
+            dbQuestion.Qst = updatedQuestion.Qst;
+            dbQuestion.Ans = updatedQuestion.Ans;
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "examineronly")] // Only examiner can delete
         public async Task<ActionResult> DeleteQuestion(int id)
         {
             var question = await _context.Questions.FindAsync(id);
+            if (question is null)
+                return NotFound();
+
             _context.Questions.Remove(question);
-            await _context.SaveChangesAsync(); // Don't forget to save changes
-            return Ok(await _context.Questions.ToListAsync());
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

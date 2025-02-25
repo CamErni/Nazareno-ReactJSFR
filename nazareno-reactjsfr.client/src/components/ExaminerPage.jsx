@@ -9,7 +9,7 @@ import {
     updateQuestionAsync,
 } from "../redux/questionsSlice";
 import { useNavigate } from "react-router-dom";
-import { login, logout } from "../redux/authSlice";
+import { logout } from "../redux/authSlice";
 
 const ExaminerPage = () => {
     const dispatch = useDispatch();
@@ -21,12 +21,12 @@ const ExaminerPage = () => {
     const [editIndex, setEditIndex] = useState(null);
     const { isAuthenticated, user } = useSelector((state) => state.auth);
 
+    // Ensure only users with "examiner" role can access this page
     useEffect(() => {
-        if (!isAuthenticated) {
-            dispatch(logout());
-            navigate("/");
+        if (!isAuthenticated || !user.roles.includes("examiner")) {
+            navigate("/choices"); // Redirect unauthorized users
         }
-    }, [isAuthenticated, dispatch, navigate]);
+    }, [isAuthenticated, user, navigate]);
 
     useEffect(() => {
         dispatch(fetchQuestions());
@@ -34,8 +34,7 @@ const ExaminerPage = () => {
 
     const onSubmit = async (data) => {
         if (editIndex !== null) {
-            const questionToUpdate = questions.find(q => q.id === editIndex);
-            console.log(editIndex);
+            const questionToUpdate = questions.find((q) => q.id === editIndex);
             await dispatch(
                 updateQuestionAsync({
                     id: questionToUpdate.id,
@@ -50,12 +49,11 @@ const ExaminerPage = () => {
         dispatch(fetchQuestions());
     };
 
-    const handleEdit = (index) => {
-        const questionToEdit = questions.find(q => q.id === index);
-        console.log(index);
+    const handleEdit = (id) => {
+        const questionToEdit = questions.find((q) => q.id === id);
         setValue("question", questionToEdit.qst);
         setValue("answer", questionToEdit.ans);
-        setEditIndex(index);
+        setEditIndex(id);
     };
 
     const handleDelete = (id) => {
@@ -75,70 +73,55 @@ const ExaminerPage = () => {
         <div className="flex flex-col items-center justify-center min-h-screen bg-theme-lightest p-8">
             {isAuthenticated && (
                 <div className="w-full flex justify-between items-center p-4 bg-theme-dark text-white fixed top-0 left-0">
-                    <span className="text-lg">Welcome, {user.username}</span>
-                    <button
-                        onClick={handleLogout}
-                        className="bg-theme-light text-theme-dark py-2 px-4 rounded"
-                    >
+                    <span className="text-lg">Welcome, {user.username} (Role: {user.roles.join(", ")})</span>
+                    <button onClick={handleLogout} className="bg-theme-light text-theme-dark py-2 px-4 rounded">
                         Logout
                     </button>
                 </div>
             )}
             <h1 className="text-2xl font-bold mb-4 text-theme-dark">Examiner Page</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
-                <input
-                    type="text"
-                    placeholder="Question"
-                    {...register("question", { required: true })}
-                    className="border p-2 mr-2"
-                />
-                <input
-                    type="text"
-                    placeholder="Answer"
-                    {...register("answer", { required: true })}
-                    className="border p-2"
-                />
-                <button
-                    type="submit"
-                    className="bg-theme-base text-white py-2 px-4 ml-2"
-                >
-                    {editIndex !== null ? "Update" : "Add"}
-                </button>
-            </form>
+
+            {/* Show form only if user is an examiner */}
+            {user.roles.includes("examiner") && (
+                <form onSubmit={handleSubmit(onSubmit)} className="mb-4">
+                    <input type="text" placeholder="Question" {...register("question", { required: true })} className="border p-2 mr-2" />
+                    <input type="text" placeholder="Answer" {...register("answer", { required: true })} className="border p-2" />
+                    <button type="submit" className="bg-theme-base text-white py-2 px-4 ml-2">
+                        {editIndex !== null ? "Update" : "Add"}
+                    </button>
+                </form>
+            )}
+
             <div className="w-full max-w-md">
                 {questions.length > 0 ? (
-                    questions.map((q, index) => (
-                        <div key={index} className="mb-2 flex text-theme-dark items-center">
+                    questions.map((q) => (
+                        <div key={q.id} className="mb-2 flex text-theme-dark items-center">
                             <div className="flex-grow">
                                 <span>{q.qst}</span>
                             </div>
                             <div className="flex-grow">
                                 <span>{q.ans}</span>
                             </div>
-                            <div className="flex-shrink-0">
-                                <button
-                                    onClick={() => handleEdit(q.id)}
-                                    className="bg-yellow-500 text-white py-1 px-2 ml-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(q.id)}
-                                    className="bg-red-500 text-white py-1 px-2 ml-2"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+
+                            {/* Show edit and delete buttons only if user is an examiner */}
+                            {user.roles.includes("examiner") && (
+                                <div className="flex-shrink-0">
+                                    <button onClick={() => handleEdit(q.id)} className="bg-yellow-500 text-white py-1 px-2 ml-2">
+                                        Edit
+                                    </button>
+                                    <button onClick={() => handleDelete(q.id)} className="bg-red-500 text-white py-1 px-2 ml-2">
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))
                 ) : (
                     <p>Loading questions...</p>
                 )}
             </div>
-            <button
-                onClick={handleGoBack}
-                className="bg-theme-dark text-white py-2 px-4 mt-4"
-            >
+
+            <button onClick={handleGoBack} className="bg-theme-dark text-white py-2 px-4 mt-4">
                 Back to Choices
             </button>
         </div>

@@ -11,8 +11,8 @@ using Nazareno_ReactJSFR.Server;
 namespace Nazareno_ReactJSFR.Server.Migrations
 {
     [DbContext(typeof(QuestionDbContext))]
-    [Migration("20250212043457_Initial")]
-    partial class Initial
+    [Migration("20250225144731_newnewmigration")]
+    partial class newnewmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,10 @@ namespace Nazareno_ReactJSFR.Server.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Roles")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
